@@ -39,7 +39,6 @@ spec:
     targetPort: 8080
   selector:
     run: socket-app-nginx-socket
-  sessionAffinity: ClientIP
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
