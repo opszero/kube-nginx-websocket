@@ -20,38 +20,77 @@ Example manifest:
 apiVersion: v1
 kind: Service
 metadata:
-  name: nginx-socket
+  name: socket-app-nginx
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:us-west-2:<keyname>
+    service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: "*"
   labels:
-    run: nginx-socket
+    run: socket-app-nginx
 spec:
-  type: NodePort
+  type: LoadBalancer
   ports:
-  - port: 80
+  - name: https
+    port: 443
     protocol: TCP
-    nodePort: 31110
+    targetPort: 8080
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 8080
   selector:
-    run: nginx-socket
+    run: socket-app-nginx-socket
   sessionAffinity: ClientIP
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: nginx-socket
+  name: socket-app-nginx-socket
 spec:
-  replicas: 3
+  replicas: 2
   template:
     metadata:
       labels:
-        run: nginx-socket
+        run: socket-app-nginx-socket
     spec:
       containers:
-      - name: nginx-socket
+      - name: socket-app-nginx-socket
         image: apsops/kube-nginx-websocket:v0.3
         ports:
         - containerPort: 8080
         env:
           - name: SOCKET_SERVER
-            value: socket-service
+            value: socket-app
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: socket-app
+spec:
+  selector:
+    app: socket-app
+  ports:
+  - name: http
+    protocol: TCP
+    port: 80
+    targetPort: 4000
+  sessionAffinity: ClientIP
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: socket-app
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: socket-app
+    spec:
+      containers:
+      - name: socket-app
+        image: socket/app:latest
+        ports:
+        - containerPort: 4000
 ```
 
 ## Contributing
