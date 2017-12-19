@@ -34,12 +34,8 @@ http {
     server {
         listen 8080 proxy_protocol;
 
-        if (-f FULL_CERT) {
-            listen 8083 ssl proxy_protocol;
-
-            ssl_certificate      FULL_CERT;
-            ssl_certificate_key  PRIVATE_KEY;
-        }
+        ssl_certificate      <%= ENV['FULL_CERT'] %>;
+        ssl_certificate_key  <%= ENV['PRIVATE_KEY'] %>;
 
         proxy_http_version 1.1;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -50,7 +46,7 @@ http {
         client_max_body_size 100M;
 
         location / {
-            proxy_pass http://SOCKET_SERVER;
+            proxy_pass <%= ENV['SOCKET_PREFIX'] %><%= ENV['SOCKET_SERVER'] %>;
             proxy_set_header Upgrade $http_upgrade;
             proxy_set_header Connection "upgrade";
             proxy_cache_bypass $http_upgrade;
