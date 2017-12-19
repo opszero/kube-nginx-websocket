@@ -32,7 +32,7 @@ http {
     }
 
     server {
-        listen 8080 proxy_protocol;
+        listen 8080 ssl;
 
         ssl_certificate      <%= ENV['FULL_CERT'] %>;
         ssl_certificate_key  <%= ENV['PRIVATE_KEY'] %>;
